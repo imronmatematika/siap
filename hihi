@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika - PLDV</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#dbeafe,#ede9fe);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  color: #1e293b;
+}
+.container {
+  background: white;
+  width: 100%;
+  max-width: 650px;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px #64748b30;
+}
+h1 { text-align: center; color: #4338ca; }
+.subtitle { text-align:center; color:#64748b; }
+label { display:block; margin-top:15px; font-weight:bold; }
+input {
+  width:100%; padding:12px; margin-top:7px;
+  border:1px solid #cbd5e1; border-radius:8px;
+  font-size:16px;
+}
+button {
+  padding:12px 20px; border:0; border-radius:8px;
+  background:#4f46e5; color:white; font-size:15px;
+  cursor:pointer; margin-top:20px;
+}
+button:hover { background:#3730a3; }
+button:disabled { background:#94a3b8; cursor:not-allowed; }
+.primary { width:100%; }
+.hidden { display:none; }
+.info { background:#eef2ff; padding:14px; border-radius:10px; }
+.option {
+  display:block; padding:13px; margin:10px 0;
+  border:1px solid #cbd5e1; border-radius:9px;
+  cursor:pointer; font-weight:normal;
+}
+.option:hover { background:#eef2ff; }
+.option input { width:auto; margin-right:10px; }
+.progress {
+  height:9px; background:#e2e8f0;
+  border-radius:10px; margin:15px 0;
+}
+#progressBar {
+  height:100%; width:0%; background:#4f46e5;
+  border-radius:10px; transition:.3s;
+}
+.result { text-align:center; }
+.score { font-size:55px; color:#4f46e5; font-weight:bold; }
+.review {
+  text-align:left; background:#f8fafc;
+  padding:14px; border-radius:10px; margin-top:12px;
+}
+.correct { color:#15803d; }
+.wrong { color:#dc2626; }
+.small { color:#64748b; font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- HALAMAN IDENTITAS -->
+<section id="identity">
+  <h1>📚 KUIS MATEMATIKA</h1>
+  <p class="subtitle">Persamaan Linear Dua Variabel (PLDV)</p>
+  <div class="info">
+    <b>Petunjuk:</b>
+    <ul>
+      <li>Isilah identitas siswa dengan benar.</li>
+      <li>Kuis terdiri dari 5 soal pilihan ganda.</li>
+      <li>Pilih satu jawaban yang paling tepat.</li>
+      <li>Setiap jawaban benar bernilai 20 poin.</li>
+    </ul>
+  </div>
+
+  <label>Nama Lengkap</label>
+  <input id="nama" type="text" placeholder="Masukkan nama lengkap">
+
+  <label>Kelas</label>
+  <input id="kelas" type="text" placeholder="Contoh: VIII A">
+
+  <label>Nomor Absen</label>
+  <input id="absen" type="number" min="1" placeholder="Masukkan nomor absen">
+
+  <button class="primary" onclick="mulaiKuis()">MULAI KUIS</button>
+</section>
+
+<!-- HALAMAN SOAL -->
+<section id="quiz" class="hidden">
+  <h1>Kuis PLDV</h1>
+  <div class="info" id="studentInfo"></div>
+  <p id="number"></p>
+  <div class="progress"><div id="progressBar"></div></div>
+  <h3 id="question"></h3>
+  <div id="options"></div>
+  <button id="nextBtn" class="primary" onclick="berikutnya()" disabled>
+    SOAL BERIKUTNYA
+  </button>
+</section>
+
+<!-- HALAMAN HASIL -->
+<section id="result" class="hidden result">
+  <h1>🎉 Kuis Selesai!</h1>
+  <p>Hasil pengerjaan kuis:</p>
+  <div class="score" id="score"></div>
+  <h3 id="grade"></h3>
+  <div class="info" id="summary"></div>
+  <h3>Pembahasan Jawaban</h3>
+  <div id="review"></div>
+  <button class="primary" onclick="location.reload()">ULANGI KUIS</button>
+</section>
+
+</div>
+
+<script>
+const questions = [
+{
+ q:"Manakah yang merupakan bentuk persamaan linear dua variabel?",
+ o:["2x + 3 = 10","3x + 2y = 12","x² + y = 8","5x = 15"],
+ a:1,
+ e:"3x + 2y = 12 merupakan PLDV karena memiliki dua variabel berpangkat satu."
+},
+{
+ q:"Diketahui persamaan x + y = 10. Jika x = 4, nilai y adalah ...",
+ o:["4","5","6","7"],
+ a:2,
+ e:"Substitusi x = 4: 4 + y = 10, sehingga y = 6."
+},
+{
+ q:"Pasangan (x, y) yang memenuhi persamaan 2x + y = 9 adalah ...",
+ o:["(2, 3)","(3, 3)","(4, 2)","(1, 5)"],
+ a:1,
+ e:"2(3) + 3 = 6 + 3 = 9. Jadi jawabannya (3, 3)."
+},
+{
+ q:"Jika x + 2y = 11 dan x = 3, maka nilai y adalah ...",
+ o:["2","3","4","5"],
+ a:3,
+ e:"3 + 2y = 11, maka 2y = 8 dan y = 4. Perhatikan: jawaban yang benar adalah pilihan C."
+},
+{
+ q:"Harga 2 buku dan 1 pensil adalah Rp11.000. Jika harga sebuah buku dinyatakan x dan harga pensil y, model matematikanya adalah ...",
+ o:["x + y = 11.000","2x + y = 11.000","x + 2y = 11.000","2x - y = 11.000"],
+ a:1,
+ e:"Dua buku bernilai 2x dan satu pensil bernilai y. Jadi 2x + y = 11.000."
+}
+];
+
+let current = 0;
+let answers = [];
+let student = {};
+
+function mulaiKuis() {
+  const nama = document.getElementById("nama").value.trim();
+  const kelas = document.getElementById("kelas").value.trim();
+  const absen = document.getElementById("absen").value.trim();
+
+  if (!nama || !kelas || !absen || Number(absen) < 1) {
+    alert("Silakan lengkapi identitas dengan benar!");
+    return;
+  }
+
+  student = {nama, kelas, absen};
+  document.getElementById("identity").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+
+  document.getElementById("studentInfo").innerHTML =
+    `<b>Nama:</b> ${escapeHTML(nama)}<br>
+     <b>Kelas:</b> ${escapeHTML(kelas)}<br>
+     <b>Absen:</b> ${escapeHTML(absen)}`;
+
+  tampilkanSoal();
+}
+
+function escapeHTML(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[c]);
+}
+
+function tampilkanSoal() {
+  const q = questions[current];
+  document.getElementById("number").textContent =
+    `Soal ${current+1} dari ${questions.length}`;
+
+  document.getElementById("progressBar").style.width =
+    ((current+1)/questions.length*100)+"%";
+
+  document.getElementById("question").textContent = q.q;
+
+  document.getElementById("options").innerHTML =
+    q.o.map((option,i) => `
+      <label class="option">
+        <input type="radio" name="answer" value="${i}"
+          onchange="pilihJawaban(${i})">
+        ${String.fromCharCode(65+i)}. ${escapeHTML(option)}
+      </label>
+    `).join("");
+
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("nextBtn").textContent =
+    current === questions.length-1 ? "SELESAI & LIHAT NILAI" : "SOAL BERIKUTNYA";
+}
+
+function pilihJawaban(index) {
+  answers[current] = index;
+  document.getElementById("nextBtn").disabled = false;
+}
+
+function berikutnya() {
+  if (answers[current] === undefined) return;
+
+  if (current < questions.length-1) {
+    current++;
+    tampilkanSoal();
+  } else {
+    tampilkanHasil();
+  }
+}
+
+function tampilkanHasil() {
+  let benar = 0;
+
+  questions.forEach((q,i) => {
+    if (answers[i] === q.a) benar++;
+  });
+
+  const nilai = benar * 20;
+
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+
+  document.getElementById("score").textContent = nilai;
+  document.getElementById("grade").textContent =
+    nilai >= 80 ? "Sangat Baik! 🌟" :
+    nilai >= 60 ? "Baik! 👍" :
+    nilai >= 40 ? "Tetap Semangat! 💪" :
+    "Ayo Belajar Lebih Giat!";
+
+  document.getElementById("summary").innerHTML =
+    `<b>Nama:</b> ${escapeHTML(student.nama)}<br>
+     <b>Kelas:</b> ${escapeHTML(student.kelas)}<br>
+     <b>Nomor Absen:</b> ${escapeHTML(student.absen)}<hr>
+     <b>Jawaban benar:</b> ${benar}<br>
+     <b>Jawaban salah:</b> ${5-benar}<br>
+     <b>Nilai akhir:</b> ${nilai}`;
+
+  document.getElementById("review").innerHTML =
+    questions.map((q,i) => {
+      const isCorrect = answers[i] === q.a;
+      return `
+        <div class="review">
+          <b>Soal ${i+1}</b>
+          <p>${escapeHTML(q.q)}</p>
+          <p class="${isCorrect?'correct':'wrong'}">
+            Jawaban kamu: ${String.fromCharCode(65+answers[i])}.
+            ${escapeHTML(q.o[answers[i]])}
+            (${isCorrect?'Benar':'Salah'})
+          </p>
+          <p class="correct">
+            Kunci: ${String.fromCharCode(65+q.a)}.
+            ${escapeHTML(q.o[q.a])}
+          </p>
+          <p><b>Pembahasan:</b> ${escapeHTML(q.e)}</p>
+        </div>`;
+    }).join("");
+}
+</script>
+</body>
+</html>
